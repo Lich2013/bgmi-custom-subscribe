@@ -1,7 +1,9 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #coding:utf-8
 
+import os
 import time
+import argparse
 from bgmi.lib.models import STATUS_UPDATED, STATUS_UPDATING, STATUS_FOLLOWED, Bangumi, Followed, Filter
 from bgmi.lib.controllers import filter_
 from config import SUBCRIBE_BANGUMI
@@ -37,6 +39,28 @@ def customSubcribeBangumi():
         Filter.get_or_create(bangumi_name=name)
         filter_(name)
 
+def installCron():
+    """
+    install crontab
+    """
+    script_path = os.path.realpath(__file__)
+    cmd = '(crontab -l ; echo "0 */2 * * * ' \
+          'LC_ALL=en_US.UTF-8 python3 ' + script_path + ' run") | crontab -'
+    os.system(cmd)
+    print("install success")
+
 
 if __name__ == '__main__':
-    print(customSubcribeBangumi())
+    parser = argparse.ArgumentParser(
+        description='BGmi custom subcribe tool')
+    parser.add_argument(dest='action', metavar='action',
+                        help='run、install_cron')
+    args = parser.parse_args()
+    action = args.action
+    if action == 'run':
+        print(customSubcribeBangumi())
+    elif action == 'install_cron':
+        installCron()
+    else:
+        print("action error")
+        exit(1)
