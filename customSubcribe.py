@@ -20,17 +20,23 @@ def customSubcribeBangumi():
             "message": f"{name} keyword/cover not found, please check the keyword/cover",
             }
             return result
-        _, isCreated = Bangumi.get_or_create(
+        bangumi, isCreated = Bangumi.get_or_create(
                 name=name, defaults={"status": STATUS_UPDATING, "keyword":keyword, 'update_time':'Unknown', 'cover':cover}
             )
+
         if not isCreated:
-            print(name, " subcribed")
+            if SUBCRIBE_BANGUMI[name]['isUpdating']:
+                bangumi.status = STATUS_UPDATING
+                bangumi.save()
+                print(name, " subcribed and updated")
+            else:
+                print(name, " subcribed")
         follow, isfollowed = Followed.get_or_create(
                 bangumi_name=name, defaults={"status": STATUS_FOLLOWED, "episode": 0}
             )
         if not isfollowed:
             if SUBCRIBE_BANGUMI[name]['isUpdating']:
-                t =  int(time.time())
+                t = int(time.time())
                 follow.updated_time = t
                 follow.save()
                 print(name, " update update_time ", t)
